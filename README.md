@@ -110,20 +110,18 @@ prep -design picorv32a
   ```bash
     run_floorplan
   ```
+![1](https://github.com/saneeaman9/pes_pd/assets/75088597/229894f8-25a5-42a0-a889-ccac51b0018c)
 
-  1
+  
 
 * Checking logs(ioplacer.log)
 
-  2
+![2](https://github.com/saneeaman9/pes_pd/assets/75088597/eff73f99-afc9-4806-b635-36ed54126404)
+
 
 * Floorplan(.def file)
-  
-  img floorplan
-
-* Command to open the floorplan
-
-img opening the floorplan
+  ![floorplan](https://github.com/saneeaman9/pes_pd/assets/75088597/d63310f0-305d-446c-b868-c6d311a48cd9)
+![core util](https://github.com/saneeaman9/pes_pd/assets/75088597/f06e9747-abcb-4b40-bc46-31b80632c335)
 
 
 ### Library Binding and Placement
@@ -133,7 +131,9 @@ img opening the floorplan
 ```bash
   run_placement
 ```
-img runplace
+
+![runplace](https://github.com/saneeaman9/pes_pd/assets/75088597/8ea796f3-d7fb-4c72-ad48-1411c1bbd16b)
+
 
 
 * To check the floorplan using magic run this command in the floorplan folder of the desired run.
@@ -142,7 +142,8 @@ img runplace
 magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
 ```
 
- img magic
+ ![magic](https://github.com/saneeaman9/pes_pd/assets/75088597/adb0cd26-c4ee-4103-be47-31f287e36518)
+
  
 </details>
 
