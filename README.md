@@ -142,7 +142,9 @@ prep -design picorv32a
 magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
 ```
 
- ![magic](https://github.com/saneeaman9/pes_pd/assets/75088597/adb0cd26-c4ee-4103-be47-31f287e36518)
+![Screenshot from 2023-09-17 20-08-42](https://github.com/saneeaman9/pes_pd/assets/75088597/52008e44-8745-4214-8f08-8f12af18c797)
+
+
 
  
 </details>
