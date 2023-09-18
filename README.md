@@ -241,7 +241,207 @@ Select the entire inverter layout.
 
 
 <details>
-  <summary>Day 4 :</summary>
+  <summary>Day 4 : Pre-layout timing analysis and importance of good clock tree
+</summary>
+
+### LEF Info
+
+1. Technology LEF: This file contains critical information about metal layers, via configurations, and restricted Design Rule Check (DRC) rules. It defines the foundational aspects of the chip's technology.
+
+2. Cell LEF: The Cell LEF file provides an abstract representation of standard cells, encapsulating their characteristics. It is essential for accurate placement and routing of standard cells.
+
+3. Standard Cell Dimensions - The width of standard cells should be an odd multiple of the track pitch. This ensures proper alignment with horizontal tracks.Similarly, the height of standard cells should be an odd multiple of the vertical track pitch. This alignment is crucial for efficient routing.
+
+4. PnR Tool Integration - PnR tools utilize the abstract view information from the Cell LEF to guide the placement and interconnection of standard cells.
+
+5. PnR Tool Integration - PnR tools utilize the abstract view information from the Cell LEF to guide the placement and interconnection of standard cells.
+
+6. PnR Tool Integration - PnR tools utilize the abstract view information from the Cell LEF to guide the placement and interconnection of standard cells.
+
+
+### Extraction of LEF
+
+* The ```tracks.info``` file can be found in:
+  ```~/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/openlane/sky130_fd_sc_hd```
+
+
+* Open the file 
+  
+```bash
+less tracks.info
+```
+
+![tracks](https://github.com/saneeaman9/pes_pd/assets/75088597/acb7521b-254a-4a77-a4f1-7555935115b6)
+
+From above image we can say that 1st value indicates the offset and 2nd value indicates the pitch along provided direction.
+
+### Setting grid values using above file info
+
+
+![gridafter](https://github.com/saneeaman9/pes_pd/assets/75088597/0fb23cd3-ac36-4165-8b3b-ed0d8e3c0828)
+
+From the above pic, its confirmed that the pins A and Y are at the intersection of X and Y tracks. So both conditions (The width of standard cells should be an odd multiple of the track pitch & the height of standard cells should be an odd multiple of the vertical track pitch) are met.
+
+
+### LEF Generation
+
+Step 1 : Enter these commands in console
+
+```bash
+save sky130_vsdinv.mag
+```
+
+Step 2 : Open the file and extract LEF by using this command.
+
+```bash
+magic -T sky130A.tch sky130_vsdinv.mag
+```
+
+* Now enter this command in the new console.
+
+```bash
+lef write
+```
+![lefwrite](https://github.com/saneeaman9/pes_pd/assets/75088597/c64ce9ce-2786-4a90-936a-9a5eade2837d)
+
+
+Step 3 : Plug the generated lef file into PICORV32a
+
+* You can see the lef file in the vsdstdcell folder
+
+![viewlef](https://github.com/saneeaman9/pes_pd/assets/75088597/26eafec2-7f17-424a-8ab5-fb18385b3e93)
+
+* Now copy this lef file into the following directory
+  
+ ```bash
+cp sky130_vsdinv.lef /home/vsduser/Desktop/work/tools/openlane_working_dir/designs/picorv32a/src/
+  ```
+
+![copylef](https://github.com/saneeaman9/pes_pd/assets/75088597/1834c38a-a3dd-4558-b2d7-cd344c07ff54)
+
+* Now we need to copy the ```sky130_fd_sc_hd__*``` which is present in this ```Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/libs``` in this directory into this ```Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src``` directory by using the command given below.
+
+```bash
+cp sky130_fd_sc_hd__* /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+
+```
+
+![cpy2nd](https://github.com/saneeaman9/pes_pd/assets/75088597/6b92a417-ddf4-4730-9aea-130643d84626)
+
+*  Modify the ```config.tcl``` file to specify the usage of these libraries and the LEF file.
+
+![configtcl](https://github.com/saneeaman9/pes_pd/assets/75088597/47fe649a-5aac-40e0-b43f-e01b4dfb232a)
+
+Step 4 : Make sure the lef file is added
+
+* Invoke OPENLANE 
+
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane/
+docker
+./flow.tcl -interactive
+```
+
+__Make sure the lef file is added and enter these set of commands given below.__
+
+**Note : change the timestamp according to your runs.**
+
+```bash
+package require openlane 0.9
+prep -design picorv32a -17-09_10-34 -overwrite
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+run_synthesis
+```
+
+![edit openlane](https://github.com/saneeaman9/pes_pd/assets/75088597/44b68417-1a01-449b-808c-29d403896438)
+
+![synthprcss](https://github.com/saneeaman9/pes_pd/assets/75088597/d990cb65-5f6c-4735-839e-e55856948b40)
+
+The above figure shows that our vsdinv cell has been used in synthesis process
+
+**Managing slack in Very Large Scale Integration (VLSI) design, particularly in the context of Static Timing Analysis (STA). Let me provide some additional information and clarification on the points you mentioned:**
+
+1. Obtaining System Specifications: In the architecture design phase of VLSI, engineers gather system specifications that include various parameters, one of which is the required frequency of operation. This frequency is crucial for determining the overall performance of the integrated circuit.
+2. Static Timing Analysis (STA): STA is a critical step in VLSI design to ensure that the designed circuit meets its timing requirements. It involves analyzing the timing behavior of the circuit to ensure that signals meet setup and hold time requirements.
+3. Setup Timing: When referring to "pre clock tree synthesis STA analysis" and setup timing, you're concerned with ensuring that signals reach their destination registers reliably before the clock edge (setup time) to avoid setup violations.
+4. Worst Negative Slack (WNS) and Total Negative Slack (TNS): WNS represents the worst-case delay violation in the design, while TNS is the sum of all negative slack values across the design. These metrics help identify critical paths and areas where timing violations are occurring.
+5. Fixing Slack Violations: To address timing violations, designers often use STA analysis tools like OpenSTA, which is integrated into the OpenLANE tool. These tools help identify the specific violations and allow for debugging and optimization to meet timing constraints.
+
+**Two Steps for Correct Operation of Tools:**
+
+1. Design Configuration Files (.conf): These files contain tool-specific configuration settings for the design. They specify how the tools should analyze and optimize the design.
+2. Design Synopsys Design Constraint (.sdc) Files: SDC files provide industry-standard timing constraints for the design. They specify the timing requirements for various elements of the design, such as setup and hold times, clock definitions, and input/output delays.
+  
+By providing these configuration files and constraints to tools, you ensure that the tools operate correctly and optimize the design based on the specified requirements. In summary, managing slack and ensuring proper timing constraints are essential steps in VLSI design to guarantee that the integrated circuit operates correctly and meets its performance specifications. The use of STA tools and well-defined configuration files and constraints plays a crucial role in achieving this goal.
+
+Step 5 : We need to run run_synthesis again
+
+* Enable STNTH_SIZING and set SYNTH_STRATEGY "DELAY 1," carefully monitor the synthesis results for improvements in critical path delay. Adjust these settings iteratively as needed to meet your design's performance goals.
+
+![1](https://github.com/saneeaman9/pes_pd/assets/75088597/71ca3ecc-8744-4f82-b1eb-6332bfb07d2a)
+
+![2](https://github.com/saneeaman9/pes_pd/assets/75088597/1d84d875-a059-4c0c-b4be-fd45c4d7702d)
+
+Despite a significant reduction in slack, the timing requirements have not yet been met. This issue could be related to the constraints defined in the "my_base.sdc" file, which is specified in the "pre_sta.conf" configuration file. To address this, consider revising the constraints within "my_base.sdc" and then rerun the STA analysis using the command "sta pre_sta.conf" for further optimization.
+
+![3](https://github.com/saneeaman9/pes_pd/assets/75088597/2bad9960-5db8-42ff-8913-01e667ba4f6b)
+
+High fanout can lead to increased delay in digital circuits. To address this, you can enhance synthesis results by adjusting the SYNTH_MAX_FANOUT variable and then rerunning the synthesis process to optimize the fanout and reduce delay.
+
+Step 2: Enable cell buffering & performing manual cell replacement on our WNS path with the OpenSTA tool
+
+To improve timing on the worst negative slack (WNS) path, enable cell buffering to enhance signal propagation. Additionally, identify the primary net responsible for driving multiple outputs and consider replacing the driving cell with a larger version of the same cell type for potential performance gains.
+
+![4](https://github.com/saneeaman9/pes_pd/assets/75088597/40044050-8107-424f-8bc2-02c3d9255750)
+
+* Optimize the fanout value with OpenLANE tool
+
+Since we successfully synthesized the core using our VSDINV cell, it should be reflected in the layout after the ```run_placement``` stage, which follows the ```run_floorplan``` stage.
+
+![5](https://github.com/saneeaman9/pes_pd/assets/75088597/c18c5cdf-cade-4ea1-91b0-02542403b131)
+
+
+
+Step 6 : Clock Tree Synthesis 
+
+After addressing slack violations using the "pre_sta.conf" configuration, generate a netlist with the corrected design using "write_verilog." Subsequently, replace the original OpenLANE-generated "picorv32a.synthesis.v" file with this modified netlist to ensure the design incorporates the necessary fixes.
+
+In the OpenLANE flow, proceed with the "run_floorplan," "run_placement," and "run_cts" stages to further refine the design and ensure that the corrections made to the netlist are incorporated into the physical layout.
+
+Step 7 :  Post CTS- STA Analysis
+
+* Within OpenROAD, perform timing analysis by generating a ```.db``` database file.
+
+1) Launch OpenRoad.
+2) Load the LEF file from the "tmp" folder in your OpenLANE runs.
+3) Load the DEF file from the CTS results.
+4) Create and save the .db database file.
+5) Load the generated .db file.
+6) Read the CTS-generated Verilog file.
+7) Import both the minimum and maximum liberty files.
+8) Define clock domains.
+9) Generate timing reports to analyze the design further.
+
+![6](https://github.com/saneeaman9/pes_pd/assets/75088597/60e12995-ed9c-41bc-9d0b-d4f807b7cf9c)
+
+![7](https://github.com/saneeaman9/pes_pd/assets/75088597/2ad66bc9-d8a0-433a-9ca1-e20457ec32c3)
+
+![8](https://github.com/saneeaman9/pes_pd/assets/75088597/f0ce56b6-dd99-4ad0-b2dc-67bf5509e022)
+
+
+The timing results are unlikely to meet our expectations due to the utilization of min and max library files, which OpenRoad does not currently support for multi-corner optimization. To address this, we will solely employ the typical corner library for optimization purposes.
+
+
+![9](https://github.com/saneeaman9/pes_pd/assets/75088597/f240738a-6c07-44ea-bdc9-ddad50770f5d)
+![10](https://github.com/saneeaman9/pes_pd/assets/75088597/0ad78c43-d686-4936-b518-d9d722f9f5fd)
+![11](https://github.com/saneeaman9/pes_pd/assets/75088597/af966cb8-b47d-4ea9-98af-bc6ba75dec24)
+![12](https://github.com/saneeaman9/pes_pd/assets/75088597/63a46f5b-a26a-491f-873c-312e0c6201d7)
+
+
+
+
+
 </details>
 
 
