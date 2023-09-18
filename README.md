@@ -151,8 +151,93 @@ magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs
 
 
 <details>
-  <summary>Day 3 :</summary>
+  <summary>Day 3 : Design library cell using Magic Layout and ngspice characterization</summary>
+
+</br>
+
+* Clone this repository into the openlane folder
+  
+  ```bash
+  
+    cd /Desktop/work/tools/openlane_working_dir/openlane
+
+    git clone https://github.com/nickson-jose/vsdstdcelldesign.git
+
+  ```
+
+### Inverter layout using Magic
+
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign
+
+magic -T sky130A.tech sky130_inv.mag
+
+
+```
+
+[img]:magic  
+
+</br>
+
+### Exploring the layout using Magic
+
+</br>
+
+* To select a region hover over the area and press ```s``` .
+ 
+* After selecting the area type ```what``` in the console to display information on the selected area.
+
+
+![what](https://github.com/saneeaman9/pes_pd/assets/75088597/28a4451b-d681-429c-9d48-6e6058f05a14)
+
+</br>
+
+### DRC Check
+
+* To check for DRC Errors, select a region (left click for starting point, right click at end point) and see the DRC column at the top that shows how many DRC errors are present.The Details of DRC Errors will be printed on the console.
+
+![DRC check](https://github.com/saneeaman9/pes_pd/assets/75088597/3f26fcc4-d108-4618-8502-61d487179ab7)
+
+
+### Extracting PEX to SPICE with Magic
+
+Select the entire inverter layout.
+
+![ext2spice](https://github.com/saneeaman9/pes_pd/assets/75088597/8ff4e4dc-a15c-4303-a116-9b3bd3a9b1b5)
+
+![spice](https://github.com/saneeaman9/pes_pd/assets/75088597/e4816874-6c0d-49ad-97a3-488829331047)
+
+### Grid Size
+
+![grid size](https://github.com/saneeaman9/pes_pd/assets/75088597/5115f020-cbc6-41c8-a5cd-db6356129231)
+
+![gridsize2](https://github.com/saneeaman9/pes_pd/assets/75088597/7b8199b1-ce31-43f0-9d66-074de0bbecbc)
+
+### Modified SPICE netlist
+
+[img]:modifiedspice
+
+* To run the SPICE netlist
+  ```bash
+  ngspice sky130_inv.spice
+  plot y vs time a
+  ```
+
+![sim](https://github.com/saneeaman9/pes_pd/assets/75088597/0b9aa0f1-66a8-4095-9b52-0008f8d2cfe6)
+
+**Results from the graph**
+
+* Rise Transition : 0.0395ns
+* Fall transition : 0.0282ns
+* Cell Rise delay : 0.03598ns
+* Cell fall delay : 0.0483ns
+
+
+
+
+
 </details>
+
 
 
 <details>
